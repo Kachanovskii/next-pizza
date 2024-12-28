@@ -31,7 +31,8 @@ export const ChooseProductModal: React.FC<Props> = ({ className, product }) => {
           <ChoosePizzaForm
             imageUrl={product.imageUrl}
             name={product.name}
-            ingredients={[]}
+            ingredients={product.ingredients}
+            items={product.items}
           />
         ) : (
           <ChooseProductForm 

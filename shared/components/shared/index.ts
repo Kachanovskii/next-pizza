@@ -9,4 +9,5 @@ export { RangeSlider } from "./range-slider";
 export { SearchInput } from "./search-input";
 export { PizzaImage } from "./pizaa-image";
 export { ChooseProductForm } from "./choose-product-form";
+export { IngredientItem } from "./ingredient-item";
 export * from "./modals"

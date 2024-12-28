@@ -4,14 +4,22 @@ import { Title } from "./title";
 import { Button } from "../ui";
 import { PizzaImage } from "./pizaa-image";
 import { GroupVariants } from "./group-variants";
-import { pizzaSizes } from "@/shared/constans/pizza";
+import {
+  PizzaSize,
+  pizzaSizes,
+  PizzaType,
+  pizzaTypes,
+} from "@/shared/constans/pizza";
+import { Ingredient, ProductItem } from "@prisma/client";
+import { IngredientItem } from "./ingredient-item";
+import { useSet } from "react-use";
 
 interface Props {
   imageUrl: string;
   name: string;
-  ingredients: any[];
-  items?: any[];
-  onClickAdd?: VoidFunction;
+  ingredients: Ingredient[];
+  items: ProductItem[];
+  onClickAddCart?: VoidFunction;
   className?: string;
 }
 
@@ -20,16 +28,26 @@ export const ChoosePizzaForm: React.FC<Props> = ({
   imageUrl,
   ingredients,
   items,
-  onClickAdd,
+  onClickAddCart,
   className,
 }) => {
   const [size, setSize] = React.useState<PizzaSize>(20);
-  const [type, setType] = React.useState<PizzaType>(20);
+  const [type, setType] = React.useState<PizzaType>(1);
+
+  const [selectedIngredients, { toggle: addIngredient }] = useSet(
+    new Set<number>([])
+  );
 
   const textDetails =
-    "lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi.";
-  const totalPrice = 150;
-  const size = 30;
+    "lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+
+  const pizzaPrice = items.find((item) => item.pizzaType === type)?.price;
+  const totalIngredientsPrice = ingredients.filter((ingredient) =>
+    selectedIngredients
+      .has(ingredient.id)
+      .reduce((acc, ingredient) => acc + ingredient.price, 0)
+  );
+  const totalPrice = pizzaPrice + totalIngredientPrice;
 
   return (
     <div className={cn(className, "flex flex-1")}>
@@ -40,7 +58,34 @@ export const ChoosePizzaForm: React.FC<Props> = ({
 
         <p className="text-gray-400">{textDetails}</p>
 
-        <GroupVariants items={pizzaSizes} />
+        <div className="flex flex-col gap-5 mt-5">
+          <GroupVariants
+            items={pizzaSizes}
+            value={String(size)}
+            onClick={(value) => setSize(Number(value) as PizzaSize)}
+          />
+
+          <GroupVariants
+            items={pizzaTypes}
+            value={String(type)}
+            onClick={(value) => setType(Number(value) as PizzaType)}
+          />
+        </div>
+
+        <div className="mt-5 bg-gray-50 p-5 rounded-md h-[420px] overflow-auto scrollbar">
+          <div className="grid grid-cols-3 gap-3">
+            {ingredients.map((ingredient) => (
+              <IngredientItem
+                key={ingredient.id}
+                name={ingredient.name}
+                price={ingredient.price}
+                imageUrl={ingredient.imageUrl}
+                active={selectedIngredients.has(ingredient.id)}
+                onClick={() => addIngredient(ingredient.id)}
+              />
+            ))}
+          </div>
+        </div>
 
         <Button className="h-[55px] px-10 text-base rounded-[18px] w-full mt-10">
           Добавить в корзину за {totalPrice} ₽
